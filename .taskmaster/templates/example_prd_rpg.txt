@@ -1,0 +1,511 @@
+<rpg-method>
+# Repository Planning Graph (RPG) Method - PRD 템플릿
+
+이 템플릿은 Microsoft Research의 RPG 방법론을 사용하여 구조화되고 의존성 인식 PRD를 만드는 방법을 (AI 또는 사람에게) 가르칩니다. 핵심 통찰: WHAT(기능적)과 HOW(구조적)을 분리한 뒤, 명시적 의존성으로 연결합니다.
+
+## 핵심 원칙
+
+1. **이중 시맨틱**: 기능적(역량)과 구조적(코드 구성)을 따로 생각한 뒤 매핑한다
+2. **명시적 의존성**: 추측하지 말고, 무엇이 무엇에 의존하는지 항상 명시한다
+3. **위상적 순서**: 기반을 먼저 구축한 뒤 그 위에 레이어를 쌓는다
+4. **점진적 정제**: 넓게 시작하고 반복적으로 구체화한다
+
+## 이 템플릿 사용법
+
+- 각 `<instruction>` 블록의 지침을 따른다
+- `<example>` 블록에서 좋은 패턴과 나쁜 패턴을 확인한다
+- content 섹션에 프로젝트 세부사항을 채운다
+- 이를 읽는 AI는 따라가며 RPG 방법을 학습한다
+- Task Master는 결과 PRD를 의존성 인식 작업으로 파싱한다
+
+## PRD 작성에 권장하는 도구
+
+이 템플릿으로 PRD를 **작성**할 때(파싱이 아닌) **코드 컨텍스트 인식 AI 어시스턴트**를 사용하면 가장 좋은 결과를 얻을 수 있습니다:
+
+**이유?** AI가 모듈, 의존성, 연동 지점에 대한 좋은 아키텍처 결정을 내리려면 기존 코드베이스를 이해해야 합니다.
+
+**권장 도구:**
+- **Claude Code** (claude-code CLI) - 구조화된 추론과 큰 컨텍스트에 적합
+- **Cursor/Windsurf** - 전체 코드베이스 컨텍스트가 있는 IDE 통합
+- **Gemini CLI** (gemini-cli) - 대규모 코드베이스용 넓은 컨텍스트 윈도우
+- **Codex/Grok CLI** - 컨텍스트 인식 강력한 코드 생성
+
+**참고:** PRD가 작성되면 `task-master parse-prd`는 어떤 설정된 AI 모델과도 동작합니다 — PRD 텍스트 자체만 읽으면 되며, 코드베이스는 필요하지 않습니다.
+</rpg-method>
+
+---
+
+<overview>
+<instruction>
+해결책이 아니라 문제부터 시작하세요. 다음을 구체적으로 적으세요:
+- 어떤 pain point가 있는가?
+- 누가 이를 겪는가?
+- 기존 솔루션이 왜 맞지 않는가?
+- 성공이 어떤 모습인가? (측정 가능한 결과)
+
+이 섹션은 집중적으로 유지하고, 아직 구현 세부사항으로 들어가지 마세요.
+</instruction>
+
+## 문제 정의
+[핵심 문제를 설명하세요. 사용자 pain point를 구체적으로 적으세요.]
+
+## 대상 사용자
+[페르소나, 워크플로우, 달성하려는 목표를 정의하세요.]
+
+## 성공 지표
+[정량적 결과. 예: "80% 작업이 autopilot으로 완료", "수동 개입률 < 5%"]
+
+</overview>
+
+---
+
+<functional-decomposition>
+<instruction>
+이제 코드 구조가 아니라 역량(CAPABILITIES, 시스템이 무엇을 하는지)을 생각하세요.
+
+Step 1: 상위 역량 도메인 식별
+- 생각: "이 시스템이 하는 주요 일은 무엇인가?"
+- 예: Data Management, Core Processing, Presentation Layer
+
+Step 2: 각 역량에 대해 구체적 기능 나열
+- explore-exploit 전략 사용:
+  * Exploit: 핵심 가치에 필요한 기능은?
+  * Explore: 이 도메인을 완성하는 기능은?
+
+Step 3: 각 기능에 대해 정의:
+- Description: 한 문장으로 무엇을 하는지
+- Inputs: 필요한 데이터/컨텍스트
+- Outputs: 생성/반환하는 것
+- Behavior: 핵심 로직 또는 변환
+
+<example type="good">
+Capability: Data Validation
+  Feature: Schema validation
+    - Description: 정의된 schema에 대해 JSON payload 검증
+    - Inputs: JSON object, schema definition
+    - Outputs: Validation result (pass/fail) + error details
+    - Behavior: 필드 순회, 타입 확인, 제약 조건 적용
+
+  Feature: Business rule validation
+    - Description: 도메인별 validation 규칙 적용
+    - Inputs: Validated data object, rule set
+    - Outputs: Boolean + 위반 규칙 목록
+    - Behavior: 규칙을 순차 실행, 실패 시 short-circuit
+</example>
+
+<example type="bad">
+Capability: validation.js
+  (문제: 이건 FILE이지 CAPABILITY가 아님. 구조를 기능적 사고에 섞음.)
+
+Capability: Validation
+  Feature: 데이터가 좋은지 확인
+  (문제: 너무 모호함. Inputs/Outputs 없음. 실행 불가.)
+</example>
+</instruction>
+
+## Capability Tree
+
+### Capability: [이름]
+[이 역량 도메인이 다루는 것에 대한 간단한 설명]
+
+#### Feature: [이름]
+- **Description**: [한 문장]
+- **Inputs**: [필요한 것]
+- **Outputs**: [생성하는 것]
+- **Behavior**: [핵심 로직]
+
+#### Feature: [이름]
+- **Description**:
+- **Inputs**:
+- **Outputs**:
+- **Behavior**:
+
+### Capability: [이름]
+...
+
+</functional-decomposition>
+
+---
+
+<structural-decomposition>
+<instruction>
+이제 코드 구성(code organization)을 생각하세요. 역량을 실제 파일/폴더 구조에 매핑하세요.
+
+규칙:
+1. 각 역량은 모듈(폴더 또는 파일)에 매핑된다
+2. 역량 내 기능은 함수/클래스에 매핑된다
+3. 명확한 모듈 경계 사용 — 각 모듈은 하나의 책임만 가진다
+4. 각 모듈이 export하는 것(public interface)을 정의한다
+
+목표: "무엇을 하는지"(기능적)와 "어디에 있는지"(구조적) 사이의 명확한 매핑을 만든다.
+
+<example type="good">
+Capability: Data Validation
+  → Maps to: src/validation/
+    ├── schema-validator.js      (Schema validation feature)
+    ├── rule-validator.js         (Business rule validation feature)
+    └── index.js                  (Public exports)
+
+Exports:
+  - validateSchema(data, schema)
+  - validateRules(data, rules)
+</example>
+
+<example type="bad">
+Capability: Data Validation
+  → Maps to: src/utils.js
+  (문제: "utils"는 명확한 모듈 경계가 아님. validation 로직을 어디서 찾나?)
+
+Capability: Data Validation
+  → Maps to: src/validation/everything.js
+  (문제: 하나의 거대한 파일. 유지보수를 위해 기능은 별도 파일로 매핑해야 함.)
+</example>
+</instruction>
+
+## Repository Structure
+
+```
+project-root/
+├── src/
+│   ├── [module-name]/       # Maps to: [Capability Name]
+│   │   ├── [file].js        # Maps to: [Feature Name]
+│   │   └── index.js         # Public exports
+│   └── [module-name]/
+├── tests/
+└── docs/
+```
+
+## Module Definitions
+
+### Module: [이름]
+- **Maps to capability**: [기능 분해에서의 Capability]
+- **Responsibility**: [단일 명확한 목적]
+- **File structure**:
+  ```
+  module-name/
+  ├── feature1.js
+  ├── feature2.js
+  └── index.js
+  ```
+- **Exports**:
+  - `functionName()` - [무엇을 하는지]
+  - `ClassName` - [무엇을 하는지]
+
+</structural-decomposition>
+
+---
+
+<dependency-graph>
+<instruction>
+이것이 Task Master 파싱의 핵심 섹션입니다.
+
+모듈 간 명시적 의존성을 정의하세요. 이렇게 하면 작업 실행을 위한 위상적 순서가 만들어집니다.
+
+규칙:
+1. 모듈을 의존성 순서로 나열 (기반 먼저)
+2. 각 모듈에 대해 무엇에 의존하는지 명시
+3. 기반 모듈은 의존성이 없어야 함
+4. 기반이 아닌 모든 모듈은 최소 하나의 다른 모듈에 의존해야 함
+5. 생각: "이 모듈을 구축하기 전에 무엇이 존재해야 하는가?"
+
+<example type="good">
+Foundation Layer (의존성 없음):
+  - error-handling: No dependencies
+  - config-manager: No dependencies
+  - base-types: No dependencies
+
+Data Layer:
+  - schema-validator: Depends on [base-types, error-handling]
+  - data-ingestion: Depends on [schema-validator, config-manager]
+
+Core Layer:
+  - algorithm-engine: Depends on [base-types, error-handling]
+  - pipeline-orchestrator: Depends on [algorithm-engine, data-ingestion]
+</example>
+
+<example type="bad">
+- validation: Depends on API
+- API: Depends on validation
+(문제: 순환 의존성. 빌드/런타임 이슈를 유발함.)
+
+- user-auth: Depends on everything
+(문제: 의존성이 너무 많음. 더 집중되어야 함.)
+</example>
+</instruction>
+
+## Dependency Chain
+
+### Foundation Layer (Phase 0)
+의존성 없음 — 이것들이 먼저 구축됨.
+
+- **[Module Name]**: [제공하는 것]
+- **[Module Name]**: [제공하는 것]
+
+### [Layer Name] (Phase 1)
+- **[Module Name]**: Depends on [[module-from-phase-0], [module-from-phase-0]]
+- **[Module Name]**: Depends on [[module-from-phase-0]]
+
+### [Layer Name] (Phase 2)
+- **[Module Name]**: Depends on [[module-from-phase-1], [module-from-foundation]]
+
+[레이어를 계속 쌓아가세요...]
+
+</dependency-graph>
+
+---
+
+<implementation-roadmap>
+<instruction>
+의존성 그래프를 구체적인 개발 단계로 바꾸세요.
+
+각 단계는:
+1. 명확한 진입 조건 (시작 전 무엇이 존재해야 하는지)
+2. 병렬화 가능한 작업 포함 (단계 내 상호 의존성 없음)
+3. 명확한 종료 조건 (단계 완료를 어떻게 알 수 있는지)
+4. 사용 가능한(USABLE) 것을 향해 구축 (인프라만이 아님)
+
+단계 순서는 의존성 그래프의 위상 정렬을 따릅니다.
+
+<example type="good">
+Phase 0: Foundation
+  Entry: 깨끗한 repository
+  Tasks:
+    - Implement error handling utilities
+    - Create base type definitions
+    - Setup configuration system
+  Exit: 다른 모듈이 foundation을 에러 없이 import할 수 있음
+
+Phase 1: Data Layer
+  Entry: Phase 0 완료
+  Tasks:
+    - Implement schema validator (uses: base types, error handling)
+    - Build data ingestion pipeline (uses: validator, config)
+  Exit: 입력부터 검증된 출력까지 end-to-end 데이터 흐름
+</example>
+
+<example type="bad">
+Phase 1: Build Everything
+  Tasks:
+    - API
+    - Database
+    - UI
+    - Tests
+  (문제: 명확한 초점 없음. 너무 넓음. 의존성 고려 안 함.)
+</example>
+</instruction>
+
+## Development Phases
+
+### Phase 0: [Foundation Name]
+**Goal**: [이 단계가 확립하는 기반 역량]
+
+**Entry Criteria**: [시작 전 참이어야 할 것]
+
+**Tasks**:
+- [ ] [작업 이름] (depends on: [없음 또는 목록])
+  - Acceptance criteria: [완료를 아는 방법]
+  - Test strategy: [동작을 증명하는 테스트]
+
+- [ ] [작업 이름] (depends on: [없음 또는 목록])
+
+**Exit Criteria**: [단계 완료를 증명하는 관찰 가능한 결과]
+
+**Delivers**: [이 단계 후 사용자/개발자가 할 수 있는 것]
+
+---
+
+### Phase 1: [Layer Name]
+**Goal**:
+
+**Entry Criteria**: Phase 0 완료
+
+**Tasks**:
+- [ ] [작업 이름] (depends on: [[tasks-from-phase-0]])
+- [ ] [작업 이름] (depends on: [[tasks-from-phase-0]])
+
+**Exit Criteria**:
+
+**Delivers**:
+
+---
+
+[더 많은 단계를 이어가세요...]
+
+</implementation-roadmap>
+
+---
+
+<test-strategy>
+<instruction>
+테스트가 개발 전반에 어떻게 통합될지 정의하세요 (TDD 접근).
+
+명시할 것:
+1. 테스트 피라미드 비율 (unit vs integration vs e2e)
+2. 커버리지 요구사항
+3. 핵심 테스트 시나리오
+4. Surgical Test Generator용 테스트 생성 가이드라인
+
+이 섹션은 TDD의 RED 단계에서 테스트를 생성할 때 AI를 안내합니다.
+
+<example type="good">
+Data Validation 모듈의 핵심 테스트 시나리오:
+  - Happy path: 유효한 데이터가 모든 검사를 통과
+  - Edge cases: 빈 문자열, null 값, 경계 숫자
+  - Error cases: 잘못된 타입, 필수 필드 누락
+  - Integration: Validator가 ingestion pipeline과 동작
+</example>
+</instruction>
+
+## Test Pyramid
+
+```
+        /\
+       /E2E\       ← [X]% (End-to-end, 느림, 포괄적)
+      /------\
+     /Integration\ ← [Y]% (모듈 상호작용)
+    /------------\
+   /  Unit Tests  \ ← [Z]% (빠름, 격리, 결정적)
+  /----------------\
+```
+
+## Coverage Requirements
+- Line coverage: [X]% 최소
+- Branch coverage: [X]% 최소
+- Function coverage: [X]% 최소
+- Statement coverage: [X]% 최소
+
+## Critical Test Scenarios
+
+### [Module/Feature Name]
+**Happy path**:
+- [시나리오 설명]
+- Expected: [일어나야 할 일]
+
+**Edge cases**:
+- [시나리오 설명]
+- Expected: [일어나야 할 일]
+
+**Error cases**:
+- [시나리오 설명]
+- Expected: [시스템이 실패를 어떻게 처리하는지]
+
+**Integration points**:
+- [테스트할 상호작용]
+- Expected: [End-to-end 동작]
+
+## Test Generation Guidelines
+[Surgical Test Generator가 무엇에 집중하고, 어떤 패턴을 따르며, 프로젝트별 테스트 규칙을 어떻게 적용할지에 대한 구체적 지침]
+
+</test-strategy>
+
+---
+
+<architecture>
+<instruction>
+기술 아키텍처, 데이터 모델, 핵심 설계 결정을 설명하세요.
+
+이 섹션은 기능/구조 분해 이후에 두세요 — 구조를 이해한 뒤에 구현 세부사항이 옵니다.
+</instruction>
+
+## System Components
+[주요 아키텍처 조각과 그 책임]
+
+## Data Models
+[핵심 데이터 구조, schema, 데이터베이스 설계]
+
+## Technology Stack
+[언어, 프레임워크, 핵심 라이브러리]
+
+**Decision: [Technology/Pattern]**
+- **Rationale**: [선택 이유]
+- **Trade-offs**: [포기하는 것]
+- **Alternatives considered**: [검토한 다른 옵션]
+
+</architecture>
+
+---
+
+<risks>
+<instruction>
+개발을 방해할 수 있는 리스크와 완화 방안을 식별하세요.
+
+카테고리:
+- 기술적 리스크 (복잡도, 미지의 것)
+- 의존성 리스크 (차단 이슈)
+- 범위 리스크 (creep, 과소 추정)
+</instruction>
+
+## Technical Risks
+**Risk**: [설명]
+- **Impact**: [High/Medium/Low - 프로젝트에 미치는 영향]
+- **Likelihood**: [High/Medium/Low]
+- **Mitigation**: [대응 방법]
+- **Fallback**: [완화가 실패할 경우 Plan B]
+
+## Dependency Risks
+[외부 의존성, 차단 이슈]
+
+## Scope Risks
+[Scope creep, 과소 추정, 불명확한 요구사항]
+
+</risks>
+
+---
+
+<appendix>
+## References
+[논문, 문서, 유사 시스템]
+
+## Glossary
+[도메인별 용어]
+
+## Open Questions
+[개발 중 해결할 사항]
+</appendix>
+
+---
+
+<task-master-integration>
+# Task Master가 이 PRD를 사용하는 방법
+
+`task-master parse-prd <file>.txt`를 실행하면 파서는:
+
+1. **역량 추출** → 메인 작업
+   - 각 `### Capability:`가 최상위 작업이 됨
+
+2. **기능 추출** → 서브태스크
+   - 각 `#### Feature:`가 해당 역량의 서브태스크가 됨
+
+3. **의존성 파싱** → 작업 의존성
+   - `Depends on: [X, Y]`가 task.dependencies = ["X", "Y"]로 설정됨
+
+4. **단계별 정렬** → 작업 우선순위
+   - Phase 0 작업 = 최고 우선순위
+   - Phase N 작업 = 낮은 우선순위, 적절한 순서
+
+5. **테스트 전략 사용** → 테스트 생성 컨텍스트
+   - 구현 중 Surgical Test Generator에 테스트 시나리오 전달
+
+**결과**: 위상적 순서로 실행 가능한 의존성 인식 작업 그래프.
+
+## RPG 구조가 중요한 이유
+
+전통적인 평면 PRD는 다음을 유발합니다:
+- ❌ 불명확한 작업 의존성
+- ❌ 임의의 작업 순서
+- ❌ 순환 의존성을 늦게 발견
+- ❌ 범위가 잘못된 작업
+
+RPG 구조 PRD는 다음을 제공합니다:
+- ✅ 명시적 의존성 체인
+- ✅ 위상적 실행 순서
+- ✅ 명확한 모듈 경계
+- ✅ 구현 전 검증된 작업 그래프
+
+## 최상의 결과를 위한 팁
+
+1. **의존성 그래프에 시간을 투자하세요** — Task Master에 가장 가치 있는 섹션입니다
+2. **기능을 원자적으로 유지하세요** — 각 기능은 독립적으로 테스트 가능해야 합니다
+3. **점진적 정제** — 넓게 시작하고, 복잡한 작업은 `task-master expand`로 분해하세요
+4. **research 모드 사용** — `task-master parse-prd --research`로 더 나은 작업 생성을 위해 AI를 활용하세요
+</task-master-integration>
