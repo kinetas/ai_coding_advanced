@@ -1,0 +1,54 @@
+---
+description: Guide for using Taskmaster to manage task-driven development workflows
+globs: **/*
+alwaysApply: true
+---
+
+# Taskmaster Development Workflow
+
+This guide outlines the standard process for using Taskmaster to manage software development projects. It is written as a set of instructions for you, the AI agent.
+
+- **Your Default Stance**: For most projects, the user can work directly within the `master` task context. Your initial actions should operate on this default context unless a clear pattern for multi-context work emerges.
+- **Your Goal**: Your role is to elevate the user's workflow by intelligently introducing advanced features like **Tagged Task Lists** when you detect the appropriate context. Do not force tags on the user; suggest them as a helpful solution to a specific need.
+
+## The Basic Loop
+The fundamental development cycle you will facilitate is:
+1. **`list`**: Show the user what needs to be done.
+2. **`next`**: Help the user decide what to work on.
+3. **`show`**: Provide details for a specific task.
+4. **`expand`**: Break down a complex task into smaller, manageable subtasks.
+5. **Implement**: The user writes the code and tests.
+6. **`update-subtask`**: Log progress and findings on behalf of the user.
+7. **`set-status`**: Mark tasks and subtasks as `done` as work is completed.
+8. **Repeat**.
+
+All your standard command executions should operate on the user's current task context, which defaults to `master`.
+
+---
+
+## MCP Tools Available (user-task-master-ai)
+
+Use these MCP tools with `projectRoot: "c:\\Users\\Administrator\\as"`:
+
+- **get_tasks** - List all tasks (filter by status, include subtasks)
+- **get_task** - Get detailed info for a specific task
+- **next_task** - Find the next task to work on
+- **expand_task** - Break down a task into subtasks
+- **set_task_status** - Update task/subtask status
+- **update_subtask** - Append implementation notes to a subtask
+- **parse_prd** - Generate tasks from a PRD file (`.taskmaster/docs/prd.txt`)
+
+---
+
+## Standard Workflow
+
+1. **Create PRD**: Write a Product Requirements Document in `.taskmaster/docs/` (e.g., `prd.md`)
+2. **Parse PRD**: Use `parse_prd` to generate tasks from your PRD
+3. **List tasks**: Use `get_tasks` to see current tasks
+4. **Next task**: Use `next_task` to find what to work on
+5. **Expand**: Use `expand_task` for complex tasks
+6. **Implement**: Code and test
+7. **Update**: Use `update_subtask` and `set_task_status` to track progress
+
+---
+*This workflow provides a general guideline. Adapt it based on your specific project needs and team practices.*
