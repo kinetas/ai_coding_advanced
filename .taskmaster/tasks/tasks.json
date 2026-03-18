@@ -1,3 +1,126 @@
 {
-  "master": []
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "데이터 크롤링 자동화 기능 구축",
+        "description": "크롤링으로 정보를 수집하고 실제 데이터베이스에 저장되는지 확인",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "details": "스케줄러가 크롤러 실행 → 수집 데이터 변환·적재 → DB에 저장. 원시 데이터 테이블에 JSON 또는 정규화된 스키마로 저장. Naver API 등 크롤링 API 활용, rate limiting 적용.",
+        "testStrategy": "크롤러 실행 후 DB에 데이터가 저장되는지 확인",
+        "subtasks": [],
+        "metadata": {},
+        "updatedAt": "2026-03-18T11:00:15.310Z"
+      },
+      {
+        "id": "2",
+        "title": "데이터 ETL 기능 추가",
+        "description": "ETL 파이프라인을 통해 수집 데이터 정제·최신화",
+        "status": "pending",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "details": "Python+Pandas로 ETL 구현. 크롤링된 원시 데이터를 변환·정제하여 분석용 테이블에 적재. Cron 또는 Celery Beat로 주기 실행.",
+        "testStrategy": "ETL 실행 후 정제된 데이터가 DB에 올바르게 저장되는지 확인",
+        "subtasks": [],
+        "metadata": {}
+      },
+      {
+        "id": "3",
+        "title": "메인페이지와 워드클라우드 기능 구현",
+        "description": "메인페이지와 워드클라우드 기능 구현 및 데이터베이스에서 정보 로딩 확인",
+        "status": "done",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "details": "분야별 텍스트 추출 → 토큰화·빈도 집계 → 워드클라우드 생성 → DB 저장 후 프론트에서 표시. 반응형 UI로 휴대폰에서도 쉽게 볼 수 있도록 구현.",
+        "testStrategy": "메인페이지 접속 시 워드클라우드가 DB에서 로딩되어 표시되는지 확인",
+        "subtasks": [],
+        "metadata": {}
+      },
+      {
+        "id": "4",
+        "title": "서버 제공 분석 기능 및 분석페이지 제작",
+        "description": "카테고리→중분류→세부 선택 후 평균가·예측 등 표시",
+        "status": "pending",
+        "dependencies": [
+          "3"
+        ],
+        "priority": "high",
+        "details": "사용자가 위치 허용 후 분야 선택 → 서버가 해당 지역·분야 분석 결과 조회 → 화면에 표시. 평균 가격·가격 상승/하락 예측 등 통계·분석 정보 제공.",
+        "testStrategy": "비로그인 사용자가 카테고리 선택 후 분석 결과를 볼 수 있는지 확인",
+        "subtasks": [],
+        "metadata": {}
+      },
+      {
+        "id": "5",
+        "title": "로그인 기능 구현 및 권한 설정",
+        "description": "사용자 인증 및 권한 관리",
+        "status": "pending",
+        "dependencies": [
+          "4"
+        ],
+        "priority": "medium",
+        "details": "로그인/회원가입 기능, 세션 관리, 권한별 접근 제어.",
+        "testStrategy": "로그인 후 권한에 따른 접근 제어가 동작하는지 확인",
+        "subtasks": [],
+        "metadata": {}
+      },
+      {
+        "id": "6",
+        "title": "키워드 맞춤 분석 기능 및 페이지 제작",
+        "description": "로그인 유저 전용 키워드를 통한 분석기능 (4의 기능 재활용)",
+        "status": "pending",
+        "dependencies": [
+          "5"
+        ],
+        "priority": "medium",
+        "details": "사용자 키워드 입력 → 서버가 DB에서 조회·분석 → 지역별 합계·평균·예측·분산 등 결과 반환.",
+        "testStrategy": "권한 유저가 키워드 입력 후 맞춤 분석 결과를 볼 수 있는지 확인",
+        "subtasks": [],
+        "metadata": {}
+      },
+      {
+        "id": "7",
+        "title": "GPS API 연동",
+        "description": "내 위치를 기준으로 관심 분야 분석",
+        "status": "pending",
+        "dependencies": [
+          "6"
+        ],
+        "priority": "low",
+        "details": "GPS API로 사용자 위치 획득 → 해당 지역 기반 분석 결과 제공.",
+        "testStrategy": "위치 허용 시 지역별 분석이 표시되는지 확인",
+        "subtasks": [],
+        "metadata": {}
+      },
+      {
+        "id": "8",
+        "title": "SNS API 연동",
+        "description": "분석 결과 SNS 공유 기능",
+        "status": "pending",
+        "dependencies": [
+          "6"
+        ],
+        "priority": "low",
+        "details": "분석 결과를 SNS API로 공유할 수 있게 함.",
+        "testStrategy": "분석 결과를 SNS로 공유할 수 있는지 확인",
+        "subtasks": [],
+        "metadata": {}
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2026-03-18T11:00:15.311Z",
+      "taskCount": 8,
+      "completedCount": 1,
+      "tags": [
+        "master"
+      ]
+    }
+  }
 }

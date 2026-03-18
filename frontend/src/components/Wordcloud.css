@@ -1,0 +1,32 @@
+.wordcloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em 1em;
+  padding: 1.5rem;
+  min-height: 120px;
+}
+
+.wordcloud-word {
+  font-size: calc(0.9rem * var(--scale, 1));
+  font-weight: 500;
+  color: var(--word-color, #2d5a3d);
+  padding: 0.2em 0.4em;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.wordcloud-word:hover {
+  transform: scale(1.08);
+  color: var(--word-hover, #1a3d27);
+}
+
+@media (max-width: 600px) {
+  .wordcloud {
+    padding: 1rem;
+    gap: 0.4em 0.8em;
+  }
+  .wordcloud-word {
+    font-size: calc(0.8rem * var(--scale, 1));
+  }
+}
